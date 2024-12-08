@@ -19,7 +19,7 @@ def compute_prediction_stats(tickers, pred, obj):
         realization = (np.dot(_pred, _obj) / len(_pred)) / std_dev_pred
         rmse = np.sqrt(np.mean(np.square(_pred - _obj)))
 
-        stats[0, :] = np.array([accuracy, std_dev_obj, std_dev_pred, realization, rmse])
+        stats[stock_id, :] = np.array([accuracy, std_dev_obj, std_dev_pred, realization, rmse])
 
     df = pd.DataFrame(stats, columns=columns)
     df.insert(0, "Tickers", tickers)
