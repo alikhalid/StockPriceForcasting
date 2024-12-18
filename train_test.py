@@ -2,7 +2,7 @@ import torch
 from sklearn.metrics import mean_squared_error
 
 
-def train(epoch, X, y, model, optimizer, criterion, writer):
+def train(epoch, X, y, model, optimizer, criterion, writer, monitoring_freq=100):
     model.train()
     optimizer.zero_grad()
     outputs = model(X)
@@ -13,7 +13,7 @@ def train(epoch, X, y, model, optimizer, criterion, writer):
 
     writer.add_scalar('train/loss', loss.item(), epoch)
 
-    if (epoch + 1) % 500 == 0:
+    if (epoch + 1) % monitoring_freq == 0:
         print(f'Epoch {epoch + 1}, Loss: {loss.item():.4f}')
 
 

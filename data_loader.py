@@ -4,7 +4,7 @@ import yfinance as yf
 import numpy as np
 
 
-def load_stock(ticker):
+def load_stock_yfinance(ticker, num_t=500):
     ticker = yf.Ticker(ticker)
     historical_data = ticker.history(period="5y")
     close = np.array(historical_data.Close)
@@ -20,11 +20,38 @@ def load_stock(ticker):
     vol = np.array(historical_data.Volume)[1:-1]
     vol = vol / np.mean(vol)
 
-    obj = (next_close - next_open) / next_open
+    obj1 = (next_close - close) / close
+    obj2 = (next_open - close) / close
+    data = np.concatenate([[(close - open) / open],
+                           [(next_open - close) / close],
+                           #[(open - last_close) / last_close],
+                           [vol]])
+    return data.astype(np.float32)[:, :num_t], obj1.astype(np.float32)[:num_t]
+
+
+
+def load_stock_intraday(ticker):
+    ticker = yf.Ticker(ticker)
+    historical_data = ticker.history(period="5d", interval="5m")
+    close = np.array(historical_data.Close)
+    open = np.array(historical_data.Open)
+
+    next_open = open[2:]
+    next_close = close[2:]
+    last_open = open[:-2]
+    last_close = close[:-2]
+    open = open[1:-1]
+    close = close[1:-1]
+
+    vol = np.array(historical_data.Volume)[1:-1]
+    vol = vol / np.mean(vol)
+
+    obj1 = (next_close - next_open) / next_open
+    obj2 = (next_open - close) / close
     data = np.concatenate([[(close - open) / open],
                            [(next_open - close) / close],
                            [vol]])
-    return data.astype(np.float32)[:, :1000], obj.astype(np.float32)[:1000]
+    return data.astype(np.float32)[:, :1000], obj1.astype(np.float32)[:1000]
 
 
 def setup_cov_tensors(X, y, sequence_length):
